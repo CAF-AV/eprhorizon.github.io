@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UK Packaging EPR Tracker — EPR Horizon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  /* ─── TOKENS ─── */
+  :root {
+    --bg:       #243B35;
+    --surface:  #1C2F28;
+    --surface2: #2C4A3E;
+    --card:     rgba(255,255,255,0.05);
+    --border:   rgba(255,255,255,0.09);
+    --accent:   #BEF0A8;
+    --gold:     #C9A84C;
+    --sage:     #7AA88A;
+    --warn:     #D4A843;
+    --red:      #C0665A;
+    --text:     #EDF2EC;
+    --muted:    #7A9A84;
+    --soft:     rgba(255,255,255,0.04);
+  }
+
+  /* ─── RESET & BASE ─── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 100%;
+    /* NO fixed height — let content define height for Framer */
+    overflow-x: hidden;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* ─── OUTER WRAPPER ─── */
+  /* No max-width or centering — Framer handles the container */
+  .tracker {
+    width: 100%;
+    padding: 0;
+  }
+
+  /* ─── INNER CONTENT WIDTH ─── */
+  /* All sections constrain their own content */
+  .inner {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+
+  /* ─── TYPOGRAPHY ─── */
+  h1 { font-size: clamp(1.8rem, 4vw, 3rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; color: var(--text); }
+  h2 { font-size: clamp(1.2rem, 2.2vw, 1.7rem); font-weight: 600; letter-spacing: -0.02em; line-height: 1.2; color: var(--text); }
+  h3 { font-size: 1rem; font-weight: 700; line-height: 1.25; color: var(--text); }
+  h4 { font-size: 0.88rem; font-weight: 700; line-height: 1.3; color: var(--text); }
+  p  { font-size: 0.85rem; color: var(--muted); line-height: 1.75; }
+  .ta { color: var(--accent); }
+  .tg { color: var(--gold); }
+  .ts { color: var(--sage); }
+  .tw { color: var(--warn); }
+  .tr { color: var(--red); }
+  .tm { color: var(--muted); }
+
+  /* ─── SECTION ─── */
+  .section { padding: 48px 0; }
+  .section.alt { background: var(--surface); }
+  .sec-eye {
+    font-size: 0.62rem; font-weight: 700; color: var(--accent);
+    letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 6px;
+  }
+  .sec-body { font-size: 0.85rem; color: var(--muted); max-width: 580px; line-height: 1.75; margin-bottom: 28px; }
+  hr { border: none; border-top: 1px solid var(--border); }
+
+  /* ─── INTRO ─── */
+  .intro { padding: 40px 0 32px; border-bottom: 1px solid var(--border); }
+  .intro-grid { display: grid; grid-template-columns: 1fr 340px; gap: 40px; align-items: start; }
+  .intro-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 0.62rem; font-weight: 700; color: var(--accent);
+    letter-spacing: 0.13em; text-transform: uppercase; margin-bottom: 14px;
+  }
+  .tdot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); animation: blink 2.5s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .intro h1 { margin-bottom: 12px; }
+  .intro h1 em { font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; color: var(--accent); }
+  .intro-desc { font-size: 0.88rem; color: var(--muted); line-height: 1.75; margin-bottom: 18px; }
+  .who-box { background: var(--card); border: 1px solid var(--border); border-radius: 9px; padding: 14px 16px; }
+  .who-lbl { font-size: 0.6rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 7px; }
+  .who-item { display: flex; align-items: flex-start; gap: 7px; font-size: 0.78rem; color: var(--muted); line-height: 1.5; margin-bottom: 4px; }
+  .who-item:last-child { margin-bottom: 0; }
+  .who-item::before { content:'→'; color: var(--accent); font-weight: 700; flex-shrink: 0; }
+
+  /* Status board */
+  .sb { background: var(--surface); border: 1px solid var(--border); border-radius: 11px; overflow: hidden; }
+  .sb-head { padding: 10px 15px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .sb-hl { font-size: 0.6rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+  .sb-live { display: flex; align-items: center; gap: 4px; font-size: 0.6rem; font-weight: 700; color: var(--accent); }
+  .sb-ld { width: 4px; height: 4px; border-radius: 50%; background: var(--accent); animation: blink 2s infinite; }
+  .sb-row { padding: 10px 15px; border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.15s; }
+  .sb-row:last-child { border-bottom: none; }
+  .sb-row:hover { background: rgba(255,255,255,0.02); }
+  .sb-rl { font-size: 0.58rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.09em; margin-bottom: 2px; }
+  .sb-rv { font-size: 0.78rem; font-weight: 700; color: var(--text); line-height: 1.3; }
+  .sb-rs { font-size: 0.68rem; color: var(--muted); margin-top: 1px; }
+  .stag { display: inline-block; font-size: 0.58rem; font-weight: 700; padding: 1px 5px; border-radius: 3px; margin-right: 3px; }
+
+  /* ─── SECTION NAV ─── */
+  .sec-nav { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; padding: 20px 0; border-bottom: 1px solid var(--border); }
+  .sn-btn {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 9px; padding: 12px 10px;
+    cursor: pointer; text-align: left; text-decoration: none;
+    transition: all 0.2s; display: flex; flex-direction: column; gap: 4px;
+    font-family: 'Outfit', sans-serif;
+  }
+  .sn-btn:hover { background: rgba(190,240,168,0.06); border-color: rgba(190,240,168,0.3); transform: translateY(-1px); }
+  .sn-n { font-size: 0.6rem; font-weight: 700; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; }
+  .sn-t { font-size: 0.75rem; font-weight: 700; color: var(--text); line-height: 1.3; }
+  .sn-s { font-size: 0.65rem; color: var(--muted); line-height: 1.35; }
+  .sn-a { font-size: 0.65rem; color: var(--accent); margin-top: 2px; align-self: flex-end; }
+
+  /* ─── GLANCE ─── */
+  .glance { padding: 16px 0 0; }
+  .glance-grid {
+    display: grid; grid-template-columns: repeat(4,1fr);
+    border: 1px solid var(--border); border-radius: 11px;
+    overflow: hidden; background: var(--surface);
+  }
+  .gc { padding: 18px 20px; border-right: 1px solid var(--border); }
+  .gc:last-child { border-right: none; }
+  .gcl { font-size: 0.6rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+  .gcv { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.025em; line-height: 1; margin-bottom: 2px; }
+  .gcc { font-size: 0.68rem; color: var(--muted); }
+
+  /* ─── TAGS ─── */
+  .tag { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 5px; border-radius: 3px; display: inline-block; }
+  .tf  { background: rgba(212,168,67,0.15);  color: #D4A843; }
+  .td  { background: rgba(122,168,138,0.15); color: #7AA88A; }
+  .trg { background: rgba(190,240,168,0.12); color: #BEF0A8; }
+  .tp  { background: rgba(192,102,90,0.12);  color: #C0665A; }
+  .tdl { background: rgba(212,168,67,0.12);  color: #D4A843; }
+  .tsc { background: rgba(122,168,138,0.12); color: #7AA88A; }
+
+  /* ─── LOG ─── */
+  .log-wrap { display: grid; grid-template-columns: 160px 1fr; gap: 0; }
+  .log-sb {
+    padding-right: 20px; border-right: 1px solid var(--border);
+    position: sticky; top: 16px; align-self: start;
+  }
+  .log-sb h4 { margin-bottom: 4px; font-size: 0.82rem; }
+  .log-sb p  { font-size: 0.72rem; margin-bottom: 12px; }
+  .fbw { display: flex; flex-direction: column; gap: 3px; }
+  .fbtn {
+    display: flex; align-items: center; gap: 6px;
+    padding: 5px 8px; border-radius: 5px;
+    font-size: 0.72rem; font-weight: 600; cursor: pointer;
+    border: 1px solid transparent; background: transparent;
+    color: var(--muted); font-family: 'Outfit', sans-serif; transition: all 0.15s; text-align: left;
+  }
+  .fbtn:hover  { background: var(--soft); color: var(--text); }
+  .fbtn.active { background: var(--soft); color: var(--text); border-color: var(--border); }
+  .fdot { width: 6px; height: 6px; border-radius: 2px; flex-shrink: 0; }
+
+  .log-feed { padding-left: 20px; }
+  .log-yr {
+    font-size: 0.6rem; font-weight: 700; color: var(--muted);
+    letter-spacing: 0.12em; text-transform: uppercase;
+    padding-bottom: 8px; margin-top: 6px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .log-yr:first-child { margin-top: 0; }
+  .log-yr::after { content:''; flex:1; height:1px; background:var(--border); }
+  .log-entry {
+    display: grid; grid-template-columns: 64px 1fr;
+    gap: 0 10px; padding: 10px 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    border-radius: 5px; transition: background 0.15s;
+  }
+  .log-entry:last-child { border-bottom: none; }
+  .log-entry:hover { background: rgba(255,255,255,0.02); }
+  .log-date { font-size: 0.68rem; color: var(--muted); padding-top: 2px; white-space: nowrap; }
+  .log-tags  { display: flex; gap: 3px; flex-wrap: wrap; margin-bottom: 3px; }
+  .log-title { font-size: 0.78rem; font-weight: 700; color: var(--text); margin-bottom: 2px; line-height: 1.35; }
+  .log-desc  { font-size: 0.72rem; color: var(--muted); line-height: 1.65; }
+  .log-src   { font-size: 0.62rem; color: rgba(122,154,132,0.5); margin-top: 3px; }
+  .log-src::before { content:'↗  '; }
+
+  /* ─── DATES ─── */
+  .dates-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .dcl { font-size: 0.6rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .di { display: flex; gap: 10px; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+  .di:last-child { border-bottom: none; }
+  .db { min-width: 54px; text-align: center; background: var(--soft); border: 1px solid var(--border); border-radius: 6px; padding: 5px 4px; flex-shrink: 0; }
+  .db .dm { font-size: 0.7rem; font-weight: 800; color: var(--text); line-height: 1.1; }
+  .db .dy { font-size: 0.58rem; color: var(--muted); font-weight: 600; margin-top: 1px; }
+  .di.up .db { border-color: rgba(190,240,168,0.3); background: rgba(190,240,168,0.05); }
+  .di.up .dm { color: var(--accent); }
+  .dinfo h4 { font-size: 0.78rem; margin-bottom: 2px; }
+  .dinfo p  { font-size: 0.72rem; line-height: 1.55; }
+  .upill { display: inline-block; font-size: 0.58rem; font-weight: 700; color: var(--accent); background: rgba(190,240,168,0.1); border: 1px solid rgba(190,240,168,0.22); border-radius: 3px; padding: 1px 4px; margin-left: 4px; vertical-align: middle; }
+
+  /* ─── DATA ─── */
+  .yr-toggle { display: flex; gap: 5px; margin-bottom: 16px; }
+  .ytb {
+    padding: 6px 16px; border-radius: 7px; border: 1px solid var(--border);
+    background: var(--soft); color: var(--muted);
+    font-size: 0.78rem; font-weight: 700; cursor: pointer;
+    font-family: 'Outfit', sans-serif; transition: all 0.2s;
+  }
+  .ytb.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+  .ytb:hover:not(.active) { border-color: rgba(190,240,168,0.3); color: var(--text); }
+
+  .insight { padding: 14px 18px; margin-bottom: 18px; background: rgba(190,240,168,0.05); border: 1px solid rgba(190,240,168,0.18); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; display: flex; gap: 10px; }
+  .insight p { font-size: 0.78rem; }
+  .insight p strong { color: var(--text); }
+
+  .mat-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 7px; margin-bottom: 8px; }
+  .mat-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 11px 7px; text-align: center; transition: all 0.2s; }
+  .mat-card:hover { border-color: rgba(190,240,168,0.25); transform: translateY(-1px); }
+  .msw { width: 18px; height: 18px; border-radius: 4px; margin: 0 auto 6px; }
+  .mn  { font-size: 0.58rem; color: var(--muted); font-weight: 700; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .mv  { font-size: 0.9rem; font-weight: 800; color: var(--text); letter-spacing: -0.02em; }
+  .mu  { font-size: 0.58rem; color: var(--muted); }
+  .mc  { font-size: 0.62rem; font-weight: 700; margin-top: 2px; }
+  .mb  { height: 2px; background: rgba(255,255,255,0.05); border-radius: 2px; margin-top: 5px; overflow: hidden; }
+  .mbb { height: 100%; border-radius: 2px; transition: width 0.4s ease; }
+
+  .data-two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+  .dcard { background: var(--card); border: 1px solid var(--border); border-radius: 9px; padding: 18px; }
+  .dcard h4 { margin-bottom: 3px; font-size: 0.85rem; }
+  .dcard p  { font-size: 0.75rem; margin-bottom: 12px; }
+
+  .yr-bars { display: flex; align-items: flex-end; gap: 14px; height: 86px; }
+  .yr-col  { flex:1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .yr-val  { font-size: 0.68rem; font-weight: 700; }
+  .yr-bar  { width: 100%; border-radius: 3px 3px 0 0; }
+  .yr-lbl  { font-size: 0.65rem; font-weight: 600; text-align: center; }
+
+  .chg-row { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; }
+  .chg-l   { font-size: 0.68rem; color: var(--muted); font-weight: 600; min-width: 90px; }
+  .chg-bg  { flex:1; height: 3px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden; }
+  .chg-f   { height: 100%; border-radius: 2px; }
+  .chg-p   { font-size: 0.68rem; font-weight: 800; min-width: 38px; text-align: right; }
+
+  /* ─── FEES ─── */
+  .fees-list { display: flex; flex-direction: column; gap: 6px; }
+  .fee-row { display: flex; align-items: center; gap: 10px; padding: 9px 12px; background: var(--card); border: 1px solid var(--border); border-radius: 7px; transition: border-color 0.2s; }
+  .fee-row:hover { border-color: rgba(190,240,168,0.2); }
+  .fdot2 { width: 7px; height: 7px; border-radius: 2px; flex-shrink: 0; }
+  .fn    { font-size: 0.78rem; font-weight: 600; flex: 1; color: var(--text); }
+  .fbg2  { flex: 2; height: 3px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden; }
+  .ff    { height: 100%; border-radius: 2px; }
+  .fa    { font-size: 0.85rem; font-weight: 800; min-width: 56px; text-align: right; color: var(--text); }
+  .fno   { font-size: 0.68rem; min-width: 52px; text-align: right; }
+
+  .htable { width: 100%; border-collapse: collapse; font-size: 0.75rem; margin-top: 22px; }
+  .htable th { text-align: left; padding: 8px 11px; font-size: 0.6rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02); }
+  .htable td { padding: 9px 11px; border-bottom: 1px solid rgba(255,255,255,0.04); color: var(--text); }
+  .htable tr:last-child td { border-bottom: none; }
+  .htable tr:hover td { background: rgba(255,255,255,0.015); }
+  .fpill { display: inline-block; padding: 2px 7px; border-radius: 3px; font-size: 0.68rem; font-weight: 700; }
+  .fp-c { background: rgba(190,240,168,0.12); color: var(--accent); }
+  .fp-n { background: rgba(122,168,138,0.12); color: var(--sage); }
+  .fp-o { background: var(--soft); color: var(--muted); }
+
+  /* ─── WATCHLIST ─── */
+  .watch-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+  .wcard { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px; transition: all 0.2s; }
+  .wcard:hover { border-color: rgba(190,240,168,0.2); transform: translateY(-1px); }
+  .wi  { font-size: 1.1rem; margin-bottom: 7px; }
+  .ws  { display: inline-block; font-size: 0.58rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; padding: 2px 6px; border-radius: 3px; margin-bottom: 7px; }
+  .wsa { background: rgba(190,240,168,0.12); color: var(--accent); }
+  .wsw { background: rgba(212,168,67,0.12); color: var(--warn); }
+  .wsu { background: rgba(122,168,138,0.12); color: var(--sage); }
+  .wcard h4 { margin-bottom: 5px; font-size: 0.82rem; }
+  .wcard p  { font-size: 0.75rem; margin-bottom: 10px; }
+  .wn  { font-size: 0.68rem; color: var(--muted); border-top: 1px solid var(--border); padding-top: 8px; line-height: 1.6; }
+  .wn strong { color: var(--text); }
+
+  /* ─── SIGNPOST ─── */
+  .sp { margin: 24px 0; padding: 12px 16px; background: rgba(122,168,138,0.05); border: 1px solid rgba(122,168,138,0.15); border-left: 3px solid var(--sage); border-radius: 0 8px 8px 0; }
+  .sp p { font-size: 0.78rem; }
+  .sp p strong { color: var(--text); }
+  .sp p a { color: var(--accent); text-decoration: none; font-weight: 600; }
+  .sp p a:hover { text-decoration: underline; }
+
+  /* ─── INTEGRITY ─── */
+  .int-box { background: rgba(190,240,168,0.03); border: 1px solid rgba(190,240,168,0.1); border-radius: 9px; padding: 16px 20px; display: flex; gap: 10px; align-items: flex-start; margin-bottom: 36px; }
+  .int-icon { font-size: 13px; flex-shrink: 0; margin-top: 2px; }
+  .int-text { font-size: 0.72rem; color: var(--muted); line-height: 1.75; }
+  .int-text strong { color: var(--text); font-weight: 600; }
+
+  /* ─── FOOTER ─── */
+  .tfoot { background: var(--surface); border-top: 1px solid var(--border); padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 0.68rem; color: var(--muted); }
+  .tfoot strong { color: var(--text); }
+  .tfoot a { color: var(--accent); text-decoration: none; }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 800px) {
+    .inner { padding: 0 20px; }
+    .intro-grid { grid-template-columns: 1fr; }
+    .sb { display: none; }
+    .sec-nav { grid-template-columns: repeat(3,1fr); }
+    .glance-grid { grid-template-columns: repeat(2,1fr); }
+    .gc:nth-child(2) { border-right: none; }
+    .gc:nth-child(3) { border-top: 1px solid var(--border); }
+    .gc:nth-child(4) { border-top: 1px solid var(--border); border-right: none; }
+    .log-wrap { grid-template-columns: 1fr; }
+    .log-sb { position: static; border-right: none; border-bottom: 1px solid var(--border); padding-right: 0; padding-bottom: 14px; margin-bottom: 14px; }
+    .fbw { flex-direction: row; flex-wrap: wrap; }
+    .log-feed { padding-left: 0; }
+    .dates-grid { grid-template-columns: 1fr; }
+    .mat-grid { grid-template-columns: repeat(4,1fr); }
+    .data-two { grid-template-columns: 1fr; }
+    .watch-grid { grid-template-columns: 1fr 1fr; }
+    .tfoot { padding: 14px 20px; }
+  }
+
+  @media (max-width: 500px) {
+    .inner { padding: 0 14px; }
+    .sec-nav { grid-template-columns: 1fr 1fr; }
+    .sn-s { display: none; }
+    .glance-grid { grid-template-columns: 1fr 1fr; }
+    .mat-grid { grid-template-columns: repeat(2,1fr); }
+    .watch-grid { grid-template-columns: 1fr; }
+    .fbg2 { display: none; }
+    .data-two { grid-template-columns: 1fr; }
+    .htable th:nth-child(3), .htable td:nth-child(3) { display: none; }
+    .tfoot { flex-direction: column; text-align: center; padding: 14px; }
+    .log-entry { grid-template-columns: 52px 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="tracker">
+
+  <!-- INTRO -->
+  <div class="intro">
+    <div class="inner">
+      <div class="intro-grid">
+        <div>
+          <div class="intro-tag"><span class="tdot"></span>EPR Industry Intelligence · UK Packaging</div>
+          <h1>Keeping up with<br>packaging EPR<br><em>shouldn't be hard.</em></h1>
+          <p class="intro-desc">Regulations change. Fees evolve. Deadlines move. This tracker draws directly from official government sources — so you always know where things stand.</p>
+          <div class="who-box">
+            <div class="who-lbl">This tracker is useful if you are</div>
+            <div class="who-item">A brand, retailer or manufacturer understanding your obligations</div>
+            <div class="who-item">Preparing for an upcoming reporting deadline</div>
+            <div class="who-item">Monitoring how fees and recyclability requirements are changing</div>
+            <div class="who-item">Watching developments like DRS or PPWR that affect packaging strategy</div>
+          </div>
+        </div>
+        <div class="sb">
+          <div class="sb-head">
+            <span class="sb-hl">Current Status</span>
+            <span class="sb-live"><span class="sb-ld"></span>May 2026</span>
+          </div>
+          <div class="sb-row"><div class="sb-rl">Latest update</div><div class="sb-rv ta">NPWD 2025 data published</div><div class="sb-rs">10.77M tonnes · 11 May 2026</div></div>
+          <div class="sb-row"><div class="sb-rl">POM trend (2024→2025)</div><div class="sb-rv ta">↓ 6.1% like-for-like</div><div class="sb-rs">All materials down year-on-year</div></div>
+          <div class="sb-row"><div class="sb-rl">Fee structure</div><div class="sb-rv">Modulated fees in effect</div><div class="sb-rs ts">RAM ratings — from Apr 2026</div></div>
+          <div class="sb-row"><div class="sb-rl">Next deadline</div><div class="sb-rv tw">1 October 2026</div><div class="sb-rs">Large producer H1 2026 data</div></div>
+          <div class="sb-row"><div class="sb-rl">Highest fee</div><div class="sb-rv">Plastic — £485/t</div><div class="sb-rs">Lowest: Paper & Card £215/t</div></div>
+          <div class="sb-row">
+            <div class="sb-rl">Watchlist</div>
+            <div class="sb-rv">
+              <span class="stag" style="background:rgba(212,168,67,0.15);color:#D4A843;">DRS</span>
+              <span class="stag" style="background:rgba(122,168,138,0.15);color:#7AA88A;">PPWR</span>
+              <span class="stag" style="background:rgba(190,240,168,0.15);color:#BEF0A8;">RAM</span>
+            </div>
+            <div class="sb-rs">3 active developments</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION NAV -->
+  <div class="inner">
+    <nav class="sec-nav">
+      <a class="sn-btn" href="#s1"><span class="sn-n">01</span><span class="sn-t">Regulatory Updates</span><span class="sn-s">Latest changes</span><span class="sn-a">↓</span></a>
+      <a class="sn-btn" href="#s2"><span class="sn-n">02</span><span class="sn-t">Key Dates</span><span class="sn-s">Deadlines & milestones</span><span class="sn-a">↓</span></a>
+      <a class="sn-btn" href="#s3"><span class="sn-n">03</span><span class="sn-t">Industry Data</span><span class="sn-s">NPWD reported figures</span><span class="sn-a">↓</span></a>
+      <a class="sn-btn" href="#s4"><span class="sn-n">04</span><span class="sn-t">Fee Rates</span><span class="sn-s">Current & historical</span><span class="sn-a">↓</span></a>
+      <a class="sn-btn" href="#s5"><span class="sn-n">05</span><span class="sn-t">Policy Watchlist</span><span class="sn-s">DRS, PPWR, RAM</span><span class="sn-a">↓</span></a>
+    </nav>
+
+    <!-- GLANCE -->
+    <div class="glance">
+      <div class="glance-grid">
+        <div class="gc"><div class="gcl">Total POM 2025</div><div class="gcv ta">10.77M<span style="font-size:0.85rem;">t</span></div><div class="gcc">↓ 6.1% vs 2024 like-for-like</div></div>
+        <div class="gc"><div class="gcl">Next deadline</div><div class="gcv tw" style="font-size:1rem;margin-top:3px;">1 Oct 2026</div><div class="gcc">Large producer H1 data</div></div>
+        <div class="gc"><div class="gcl">Fee structure</div><div class="gcv ts" style="font-size:1rem;margin-top:3px;">Modulated</div><div class="gcc">RAM ratings from Apr 2026</div></div>
+        <div class="gc"><div class="gcl">Data extract</div><div class="gcv" style="font-size:0.9rem;margin-top:4px;">11 May 2026</div><div class="gcc">Source: Environment Agency NPWD</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S1: UPDATES -->
+  <div class="section" id="s1">
+    <div class="inner">
+      <div class="sec-eye">// 01 — Regulatory Updates</div>
+      <h2 style="margin-bottom:6px;">Latest Changes &amp; Industry Developments</h2>
+      <p class="sec-body">Key developments logged as published, sourced from official government, regulator or scheme administrator publications.</p>
+
+      <div class="log-wrap">
+        <div class="log-sb">
+          <h4>Filter by type</h4>
+          <p>Focus on what's relevant.</p>
+          <div class="fbw">
+            <button class="fbtn active" onclick="fl('all',this)"><span class="fdot" style="background:var(--muted)"></span>All</button>
+            <button class="fbtn" onclick="fl('fee',this)"><span class="fdot" style="background:#D4A843"></span>Fees</button>
+            <button class="fbtn" onclick="fl('data',this)"><span class="fdot" style="background:#7AA88A"></span>Data</button>
+            <button class="fbtn" onclick="fl('reg',this)"><span class="fdot" style="background:#BEF0A8"></span>Regs</button>
+            <button class="fbtn" onclick="fl('policy',this)"><span class="fdot" style="background:#C0665A"></span>Policy</button>
+            <button class="fbtn" onclick="fl('deadline',this)"><span class="fdot" style="background:#D4A843"></span>Deadlines</button>
+            <button class="fbtn" onclick="fl('scheme',this)"><span class="fdot" style="background:#7AA88A"></span>Scheme</button>
+          </div>
+        </div>
+        <div class="log-feed" id="lf">
+          <div class="log-yr">2026</div>
+          <div class="log-entry" data-tags="data"><div class="log-date">May 2026</div><div><div class="log-tags"><span class="tag td">Data</span></div><div class="log-title">NPWD publishes 2023, 2024 &amp; 2025 reported packaging data</div><div class="log-desc">Most comprehensive dataset to date. 2025 covers H1 and H2 for LP and SP, plus first RAM summary. Total UK POM: 10.77M tonnes. Like-for-like, total POM fell 6.1% from 2024 to 2025.</div><div class="log-src">Environment Agency / NPWD — 11 May 2026</div></div></div>
+          <div class="log-entry" data-tags="fee reg"><div class="log-date">Apr 2026</div><div><div class="log-tags"><span class="tag tf">Fees</span><span class="tag trg">Regulations</span></div><div class="log-title">Modulated fees take effect — flat base fees replaced</div><div class="log-desc">From April 2026, fees are based on recyclability (RAM RAG ratings). Green-rated packaging pays less; red pays more. Most commercially significant change since EPR launched.</div><div class="log-src">PackUK / Defra</div></div></div>
+          <div class="log-entry" data-tags="deadline data"><div class="log-date">Apr 2026</div><div><div class="log-tags"><span class="tag tdl">Deadline</span><span class="tag td">Data</span></div><div class="log-title">Small producers submit 2025 data; large producers submit H2 2025</div><div class="log-desc">1 April 2026. Large producers now required to report flexible and rigid plastics separately for the first time.</div><div class="log-src">Defra RPD service</div></div></div>
+          <div class="log-entry" data-tags="fee scheme"><div class="log-date">Dec 2025</div><div><div class="log-tags"><span class="tag tf">Fees</span><span class="tag tsc">Scheme</span></div><div class="log-title">PackUK publishes illustrative 2026/27 modulated fees</div><div class="log-desc">Year 2 indicative fees published. Most rates lower than initial estimates. Glass reduced approximately 20%.</div><div class="log-src">PackUK / GOV.UK</div></div></div>
+          <div class="log-yr" style="margin-top:12px;">2025</div>
+          <div class="log-entry" data-tags="fee scheme"><div class="log-date">Oct 2025</div><div><div class="log-tags"><span class="tag tf">Fees</span><span class="tag tsc">Scheme</span></div><div class="log-title">First EPR invoices issued to large producers</div><div class="log-desc">PackUK issues Year 1 Notices of Liability based on 2024 data. £1.5bn total recovered. Payable as lump sum or quarterly instalments through June 2026.</div><div class="log-src">PackUK / Defra</div></div></div>
+          <div class="log-entry" data-tags="deadline data"><div class="log-date">Oct 2025</div><div><div class="log-tags"><span class="tag tdl">Deadline</span><span class="tag td">Data</span></div><div class="log-title">Large producers submit H1 2025; nation data due December</div><div class="log-desc">Nation data obligation introduced — reporting packaging by UK country — with 1 December 2025 deadline for 2024 nation data.</div><div class="log-src">Defra RPD service</div></div></div>
+          <div class="log-entry" data-tags="fee reg"><div class="log-date">Apr 2025</div><div><div class="log-tags"><span class="tag trg">Regulations</span><span class="tag tf">Fees</span></div><div class="log-title">Full EPR scheme enters force — flat base fees begin</div><div class="log-desc">Producer Responsibility Obligations (Packaging) Regulations 2024 fully in force. Year 1 flat base fees apply to all household packaging for large and small producers.</div><div class="log-src">Defra / Legislation.gov.uk</div></div></div>
+          <div class="log-yr" style="margin-top:12px;">2024</div>
+          <div class="log-entry" data-tags="policy fee"><div class="log-date">Dec 2024</div><div><div class="log-tags"><span class="tag tp">Policy</span><span class="tag tf">Fees</span></div><div class="log-title">Total EPR cost confirmed at £1.5bn — final illustrative base fees published</div><div class="log-desc">Below the £1.8bn upper scenario. Plastic: £485/t. Paper & Card: £215/t. Glass lower than expected after Scotland reporting adjustment.</div><div class="log-src">Defra, December 2024</div></div></div>
+          <div class="log-entry" data-tags="policy reg"><div class="log-date">Oct 2024</div><div><div class="log-tags"><span class="tag tp">Policy</span><span class="tag trg">Regulations</span></div><div class="log-title">Mandatory consumer labelling removed from regulations</div><div class="log-desc">Government removes Recycle / Do Not Recycle labelling from pEPR SI to avoid delays. Remains a 2027 policy direction — no current legal requirement.</div><div class="log-src">Defra / GOV.UK</div></div></div>
+          <div class="log-entry" data-tags="reg"><div class="log-date">Jan 2024</div><div><div class="log-tags"><span class="tag trg">Regulations</span></div><div class="log-title">Producer Responsibility Obligations (Packaging) Regulations 2024 laid before Parliament</div><div class="log-desc">Principal EPR framework replacing 2007 regulations. Introduces LA waste management fees, modulated fees from 2026, expanded reporting for all producer types.</div><div class="log-src">Legislation.gov.uk</div></div></div>
+          <div class="log-yr" style="margin-top:12px;">2023</div>
+          <div class="log-entry" data-tags="reg data"><div class="log-date">Jan 2023</div><div><div class="log-tags"><span class="tag trg">Regulations</span><span class="tag td">Data</span></div><div class="log-title">Packaging Waste (Data Reporting) Regulations 2023 — reporting begins</div><div class="log-desc">UK producers begin reporting packaging data under the RPD portal. Large producers half-yearly; small producers annually. Foundation of the entire EPR fee and compliance system.</div><div class="log-src">Legislation.gov.uk / Defra</div></div></div>
+        </div>
+      </div>
+
+      <div class="sp"><p><strong>Not sure if these changes affect you?</strong> If your organisation handles more than 25 tonnes of packaging annually with turnover above £1M, you are likely an obligated producer. <a href="mailto:info@eprhorizon.com">Get in touch</a> if you'd like help working out where you stand.</p></div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- S2: KEY DATES -->
+  <div class="section alt" id="s2">
+    <div class="inner">
+      <div class="sec-eye">// 02 — Key Dates</div>
+      <h2 style="margin-bottom:6px;">Deadlines &amp; Milestones</h2>
+      <p class="sec-body">Recurring annual deadlines and upcoming milestones. Based on current Defra guidance.</p>
+      <div class="dates-grid">
+        <div>
+          <div class="dcl">Recurring Annual Deadlines</div>
+          <div class="di"><div class="db"><div class="dm">1 Apr</div><div class="dy">Annual</div></div><div class="dinfo"><h4>Small producer full-year data submission</h4><p>Also the deadline for large producers to submit H2 data (July–December prior year).</p></div></div>
+          <div class="di"><div class="db"><div class="dm">1 Oct</div><div class="dy">Annual</div></div><div class="dinfo"><h4>Large producer H1 data submission</h4><p>January–June of the current year. Missing this triggers regulator contact.</p></div></div>
+          <div class="di"><div class="db"><div class="dm">1 Dec</div><div class="dy">Annual</div></div><div class="dinfo"><h4>Nation data submission</h4><p>Packaging data by UK nation. Introduced from 2024 data onwards.</p></div></div>
+          <div class="di"><div class="db"><div class="dm">Oct</div><div class="dy">Annual</div></div><div class="dinfo"><h4>EPR fee invoices issued by PackUK</h4><p>Notices of Liability based on prior year data.</p></div></div>
+          <div class="di"><div class="db"><div class="dm">Dec</div><div class="dy">Annual</div></div><div class="dinfo"><h4>PackUK publishes illustrative fees for following year</h4><p>Indicative rates for forward planning.</p></div></div>
+        </div>
+        <div>
+          <div class="dcl">Upcoming Milestones</div>
+          <div class="di up"><div class="db"><div class="dm">1 Oct</div><div class="dy">2026</div></div><div class="dinfo"><h4>Large producer H1 2026 data <span class="upill">Next</span></h4><p>First H1 under modulated fee regime. RAM ratings influence fee calculations.</p></div></div>
+          <div class="di up"><div class="db"><div class="dm">Oct</div><div class="dy">2026</div></div><div class="dinfo"><h4>Year 2 modulated fee invoices <span class="upill">Upcoming</span></h4><p>First invoices under modulated structure.</p></div></div>
+          <div class="di up"><div class="db"><div class="dm">1 Apr</div><div class="dy">2027</div></div><div class="dinfo"><h4>Small producer 2026 data &amp; large H2 2026 <span class="upill">Upcoming</span></h4><p>Third year of full EPR reporting. Compliance monitoring expected to intensify.</p></div></div>
+          <div class="di"><div class="db"><div class="dm">2027</div><div class="dy">Target</div></div><div class="dinfo"><h4>Consumer labelling (policy target)</h4><p>Recycle / Do Not Recycle — policy direction only, not currently a legal requirement.</p></div></div>
+          <div class="di"><div class="db"><div class="dm">2028</div><div class="dy">Trigger</div></div><div class="dinfo"><h4>DRS trigger for drinks containers</h4><p>If DRS not operational, PET, aluminium and steel drinks containers fall under full pEPR.</p></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- S3: DATA -->
+  <div class="section" id="s3">
+    <div class="inner">
+      <div class="sec-eye">// 03 — Industry Data</div>
+      <h2 style="margin-bottom:6px;">UK Reported Packaging Data</h2>
+      <p class="sec-body">UK-aggregated packaging placed on market (POM) from the NPWD RPD portal. Industry totals only — individual company data is not publicly disclosed.</p>
+
+      <div class="yr-toggle">
+        <button class="ytb" onclick="sy('2023',this)">2023</button>
+        <button class="ytb" onclick="sy('2024',this)">2024</button>
+        <button class="ytb active" onclick="sy('2025',this)">2025</button>
+      </div>
+      <div id="yr-note" style="font-size:0.7rem;color:var(--muted);margin-bottom:12px;">Large + small producers · extracted 11 May 2026</div>
+
+      <div class="insight"><p><strong>Total reported POM fell 6.1% like-for-like from 2024 to 2025</strong> — across every material. This may reflect genuine packaging reduction in response to EPR financial incentives, improved efficiency, or some underreporting by smaller producers still adapting. The 2026 data will be the clearest signal yet.</p></div>
+
+      <div class="mat-grid" id="mg"></div>
+      <p style="font-size:0.62rem;color:var(--muted);margin-bottom:16px;">Source: NPWD RPD portal, extracted 11 May 2026. Figures in thousands of tonnes.</p>
+
+      <div class="data-two">
+        <div class="dcard">
+          <h4>Total POM — three year comparison</h4>
+          <p>2023: large producers only. 2024–2025: large + small. Like-for-like decline 2024→2025: 6.1%.</p>
+          <div class="yr-bars">
+            <div class="yr-col"><div class="yr-val tm">12.15M</div><div class="yr-bar" style="height:78px;background:rgba(122,168,138,0.25);border:1px solid rgba(122,168,138,0.3);"></div><div class="yr-lbl tm">2023 LP</div></div>
+            <div class="yr-col"><div class="yr-val tm">11.46M</div><div class="yr-bar" style="height:72px;background:rgba(122,168,138,0.35);border:1px solid rgba(122,168,138,0.4);"></div><div class="yr-lbl tm">2024 LP+SP</div></div>
+            <div class="yr-col"><div class="yr-val ta">10.77M</div><div class="yr-bar" style="height:66px;background:rgba(190,240,168,0.18);border:1px solid rgba(190,240,168,0.4);"></div><div class="yr-lbl ta" style="font-weight:700;">2025 LP+SP</div></div>
+          </div>
+        </div>
+        <div class="dcard">
+          <h4>2024 → 2025 change by material</h4>
+          <p>Every material declined like-for-like. Fibre composite and glass saw the largest falls.</p>
+          <div class="chg-row"><span class="chg-l">Fibre Composite</span><div class="chg-bg"><div class="chg-f" style="width:100%;background:#C0665A;"></div></div><span class="chg-p tr">−13.3%</span></div>
+          <div class="chg-row"><span class="chg-l">Glass</span><div class="chg-bg"><div class="chg-f" style="width:90%;background:#C0665A;"></div></div><span class="chg-p tr">−12.0%</span></div>
+          <div class="chg-row"><span class="chg-l">Steel</span><div class="chg-bg"><div class="chg-f" style="width:72%;background:#D4A843;"></div></div><span class="chg-p tw">−9.6%</span></div>
+          <div class="chg-row"><span class="chg-l">Paper &amp; Card</span><div class="chg-bg"><div class="chg-f" style="width:39%;background:#D4A843;"></div></div><span class="chg-p tw">−5.2%</span></div>
+          <div class="chg-row"><span class="chg-l">Plastic</span><div class="chg-bg"><div class="chg-f" style="width:27%;background:#D4A843;"></div></div><span class="chg-p tw">−3.6%</span></div>
+          <div class="chg-row"><span class="chg-l">Aluminium</span><div class="chg-bg"><div class="chg-f" style="width:26%;background:#7AA88A;"></div></div><span class="chg-p ts">−3.4%</span></div>
+          <div class="chg-row"><span class="chg-l">Wood</span><div class="chg-bg"><div class="chg-f" style="width:8%;background:#7AA88A;"></div></div><span class="chg-p ts">−1.0%</span></div>
+        </div>
+      </div>
+
+      <div class="sp"><p><strong>What does your packaging mix mean for your fees?</strong> Plastic costs more than twice as much per tonne as paper and card. Understanding your material breakdown is the first step to understanding your EPR cost exposure. <a href="mailto:info@eprhorizon.com">Contact us</a> to discuss your specific situation.</p></div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- S4: FEES -->
+  <div class="section alt" id="s4">
+    <div class="inner">
+      <div class="sec-eye">// 04 — Fee Rates</div>
+      <h2 style="margin-bottom:6px;">Current &amp; Historical Fee Rates</h2>
+      <p class="sec-body">Year 1 base fees per tonne of household packaging. From 2026/27, flat fees are replaced by modulated rates based on RAM recyclability ratings.</p>
+
+      <div class="fees-list">
+        <div class="fee-row"><div class="fdot2" style="background:#BEF0A8;"></div><div class="fn">Plastic</div><div class="fbg2"><div class="ff" style="width:100%;background:rgba(190,240,168,0.35);"></div></div><div class="fa">£485<span style="font-size:0.65rem;color:var(--muted);font-weight:400;">/t</span></div><div class="fno ta">Highest</div></div>
+        <div class="fee-row"><div class="fdot2" style="background:#D4A843;"></div><div class="fn">Fibre Composite</div><div class="fbg2"><div class="ff" style="width:94%;background:rgba(212,168,67,0.35);"></div></div><div class="fa">£455<span style="font-size:0.65rem;color:var(--muted);font-weight:400;">/t</span></div><div class="fno tm"></div></div>
+        <div class="fee-row"><div class="fdot2" style="background:#C0665A;"></div><div class="fn">Aluminium</div><div class="fbg2"><div class="ff" style="width:90%;background:rgba(192,102,90,0.35);"></div></div><div class="fa">£435<span style="font-size:0.65rem;color:var(--muted);font-weight:400;">/t</span></div><div class="fno tm"></div></div>
+        <div class="fee-row"><div class="fdot2" style="background:#7AA88A;"></div><div class="fn">Wood</div><div class="fbg2"><div class="ff" style="width:66%;background:rgba(122,168,138,0.35);"></div></div><div class="fa">£320<span style="font-size:0.65rem;color:var(--muted);font-weight:400;">/t</span></div><div class="fno tm"></div></div>
+        <div class="fee-row"><div class="fdot2" style="background:#5A7A6A;"></div><div class="fn">Steel</div><div class="fbg2"><div class="ff" style="width:63%;background:rgba(90,122,106,0.4);"></div></div><div class="fa">£305<span style="font-size:0.65rem;color:var(--muted);font-weight:400;">/t</span></div><div class="fno tm"></div></div>
+        <div class="fee-row"><div class="fdot2" style="background:#4A8A7A;"></div><div class="fn">Glass</div><div class="fbg2"><div class="ff" style="width:50%;background:rgba(74,138,122,0.4);"></div></div><div class="fa">£240<span style="font-size:0.65rem;color:var(--muted);font-weight:400;">/t</span></div><div class="fno tm"></div></div>
+        <div class="fee-row"><div class="fdot2" style="background:#3A6A5A;"></div><div class="fn">Paper &amp; Card</div><div class="fbg2"><div class="ff" style="width:44%;background:rgba(58,106,90,0.5);"></div></div><div class="fa">£215<span style="font-size:0.65rem;color:var(--muted);font-weight:400;">/t</span></div><div class="fno ts">Lowest</div></div>
+      </div>
+
+      <div style="margin-top:24px;">
+        <h3 style="margin-bottom:3px;font-size:0.9rem;">How fees have evolved</h3>
+        <p style="font-size:0.78rem;color:var(--muted);margin-bottom:12px;line-height:1.65;">From the old PRN system through to modulated fees.</p>
+        <table class="htable">
+          <thead><tr><th>Period</th><th>Structure</th><th>Total cost</th><th>Key development</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td style="color:var(--muted);">Pre-2025</td><td style="color:var(--muted);">Old PRN system</td><td style="color:var(--muted);">~£200–300M/yr</td><td style="color:var(--muted);">Fraction of actual costs</td><td><span class="fpill fp-o">Superseded</span></td></tr>
+            <tr><td>Dec 2024</td><td>Flat base fees</td><td>£1.5bn confirmed</td><td>Plastic £485/t, Paper £215/t</td><td><span class="fpill fp-o">Year 1 basis</span></td></tr>
+            <tr><td>Oct 2025</td><td>Flat base fees</td><td>£1.5bn invoiced</td><td>First invoices. Glass ~20% lower than estimates</td><td><span class="fpill fp-c">Year 1</span></td></tr>
+            <tr><td>Apr 2026+</td><td>Modulated (RAG)</td><td>TBC by RAM</td><td>Green pays less, red pays more</td><td><span class="fpill fp-n">Year 2 — current</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sp" style="margin-top:24px;"><p><strong>Modulated fees change the calculation entirely.</strong> The recyclability of your specific packaging design now determines what you pay. <a href="mailto:info@eprhorizon.com">Get in touch</a> to understand what this means for your portfolio.</p></div>
+      <p style="font-size:0.65rem;color:var(--muted);margin-top:10px;">Source: Defra Illustrative Base Fees (December 2024). Year 1 flat rates apply to household packaging only.</p>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- S5: WATCHLIST -->
+  <div class="section" id="s5">
+    <div class="inner">
+      <div class="sec-eye">// 05 — Policy Watchlist</div>
+      <h2 style="margin-bottom:6px;">Developments Worth Monitoring</h2>
+      <p class="sec-body">Evolving policy areas that could materially affect packaging obligations in the coming years.</p>
+      <div class="watch-grid">
+        <div class="wcard"><div class="wi">🧪</div><div class="ws wsa">Active</div><h4>Modulated Fees &amp; RAM</h4><p>Now in force from 2026/27. RAM determines your fee band. First modulated invoices expected October 2026.</p><div class="wn"><strong>Watch for:</strong> RAM guidance updates, fee band adjustments, Year 2 invoice confirmation.</div></div>
+        <div class="wcard"><div class="wi">🫙</div><div class="ws wsw">Monitor</div><h4>Deposit Return Scheme</h4><p>DRS progressing across all four UK nations. If not operational by 2028, PET, aluminium and steel drinks containers fall under full pEPR.</p><div class="wn"><strong>Watch for:</strong> DRS launch confirmations, container scope, EPR fee exclusion guidance.</div></div>
+        <div class="wcard"><div class="wi">🇪🇺</div><div class="ws wsw">Monitor</div><h4>EU PPWR</h4><p>EU Packaging Regulation introduces stricter recyclability and reuse requirements. UK businesses selling into the EU face dual compliance obligations.</p><div class="wn"><strong>Watch for:</strong> PPWR implementation dates, UK divergence decisions.</div></div>
+        <div class="wcard"><div class="wi">🏷️</div><div class="ws wsu">Upcoming</div><h4>Consumer Labelling</h4><p>Recycle / Do Not Recycle removed from main regulations October 2024. Remains a 2027 policy direction — not currently a legal requirement.</p><div class="wn"><strong>Watch for:</strong> Reinstatement via secondary legislation ahead of 2027 target.</div></div>
+        <div class="wcard"><div class="wi">♻️</div><div class="ws wsw">Monitor</div><h4>Recycling Target Increases</h4><p>UK targets expected to rise. Most materials currently below target, creating upward fee pressure over time.</p><div class="wn"><strong>Watch for:</strong> Defra consultations on 2025 and 2030 material-specific targets.</div></div>
+        <div class="wcard"><div class="wi">🌍</div><div class="ws wsu">Upcoming</div><h4>Nation Data Expansion</h4><p>Nation data obligations still bedding in. Requirements expected to expand as the scheme matures across all four UK nations.</p><div class="wn"><strong>Watch for:</strong> Expanded attribution requirements and enforcement approach.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- INTEGRITY -->
+  <div class="inner" style="padding-top:36px;">
+    <div class="int-box">
+      <div class="int-icon">🔒</div>
+      <div class="int-text"><strong>About this page.</strong> All data sourced from: Environment Agency NPWD (extracted 11 May 2026), Defra pEPR Reported Packaging Data portal, Defra Illustrative Base Fees (December 2024), UK Statistics on Waste (July 2025), PackFlow Refresh 2023 (Valpak/WRAP), and PackUK publications. Published under Open Government Licence v3.0. Reviewed following major publications from Defra, the Environment Agency, and PackUK. No figures are modelled or estimated without clear attribution.</div>
+    </div>
+  </div>
+
+</div><!-- end .tracker -->
+
+<!-- FOOTER -->
+<div class="tfoot">
+  <strong>EPR Horizon — UK Packaging EPR Tracker</strong>
+  <span>NPWD · Environment Agency · Defra · PackUK</span>
+  <span>Reviewed May 2026 · <a href="mailto:info@eprhorizon.com">info@eprhorizon.com</a></span>
+</div>
+
+<script>
+const md = {
+  '2023': { note:'Large producers only · extracted 11 May 2026', mats:[
+    {n:'Paper & Card',v:5111,p:100,c:'#3B82F6',ch:null},
+    {n:'Plastic',v:2543,p:50,c:'#BEF0A8',ch:null},
+    {n:'Glass',v:2347,p:46,c:'#7AA88A',ch:null},
+    {n:'Wood',v:1290,p:25,c:'#D4A843',ch:null},
+    {n:'Steel',v:493,p:10,c:'#5A7A6A',ch:null},
+    {n:'Aluminium',v:244,p:5,c:'#C0665A',ch:null},
+    {n:'Fibre Comp.',v:100,p:2,c:'#8B6A3A',ch:null},
+  ]},
+  '2024': { note:'Large + small producers · extracted 11 May 2026', mats:[
+    {n:'Paper & Card',v:4823,p:100,c:'#3B82F6',ch:-5.7},
+    {n:'Plastic',v:2165,p:45,c:'#BEF0A8',ch:-14.9},
+    {n:'Glass',v:2403,p:50,c:'#7AA88A',ch:null},
+    {n:'Wood',v:1234,p:26,c:'#D4A843',ch:-4.3},
+    {n:'Steel',v:443,p:9,c:'#5A7A6A',ch:-10.1},
+    {n:'Aluminium',v:240,p:5,c:'#C0665A',ch:-1.9},
+    {n:'Fibre Comp.',v:139,p:3,c:'#8B6A3A',ch:39.1},
+  ]},
+  '2025': { note:'Large + small producers · extracted 11 May 2026', mats:[
+    {n:'Paper & Card',v:4572,p:100,c:'#3B82F6',ch:-5.2},
+    {n:'Plastic',v:2086,p:46,c:'#BEF0A8',ch:-3.6},
+    {n:'Glass',v:2114,p:46,c:'#7AA88A',ch:-12.0},
+    {n:'Wood',v:1221,p:27,c:'#D4A843',ch:-1.0},
+    {n:'Steel',v:401,p:9,c:'#5A7A6A',ch:-9.6},
+    {n:'Aluminium',v:231,p:5,c:'#C0665A',ch:-3.4},
+    {n:'Fibre Comp.',v:120,p:3,c:'#8B6A3A',ch:-13.3},
+  ]}
+};
+
+function sy(yr, btn) {
+  document.querySelectorAll('.ytb').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const d = md[yr];
+  document.getElementById('yr-note').textContent = d.note;
+  document.getElementById('mg').innerHTML = d.mats.map(m => {
+    const chg = m.ch !== null
+      ? `<div class="mc" style="color:${m.ch < 0 ? (m.ch < -8 ? '#C0665A':'#D4A843'):'#7AA88A'}">${m.ch>0?'↑':'↓'}${Math.abs(m.ch)}% vs prior</div>`
+      : `<div class="mc tm">Base year</div>`;
+    return `<div class="mat-card"><div class="msw" style="background:${m.c}22;border:1px solid ${m.c}55;"></div><div class="mn">${m.n}</div><div class="mv">${m.v.toLocaleString()}</div><div class="mu">thousand t</div>${chg}<div class="mb"><div class="mbb" style="width:${m.p}%;background:${m.c};"></div></div></div>`;
+  }).join('');
+}
+sy('2025', document.querySelector('.ytb.active'));
+
+function fl(tag, btn) {
+  document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.log-entry').forEach(e => {
+    e.style.display = (tag==='all'||(e.dataset.tags||'').includes(tag)) ? 'grid' : 'none';
+  });
+  document.querySelectorAll('.log-yr').forEach(y => {
+    let s=y.nextElementSibling, v=false;
+    while(s && !s.classList.contains('log-yr')){
+      if(s.classList.contains('log-entry')&&s.style.display!=='none') v=true;
+      s=s.nextElementSibling;
+    }
+    y.style.display = v?'flex':'none';
+  });
+}
+
+// Tell parent iframe to resize — works if Framer allows postMessage
+function notifyHeight() {
+  const h = document.body.scrollHeight;
+  window.parent.postMessage({ type: 'resize', height: h }, '*');
+}
+window.addEventListener('load', notifyHeight);
+window.addEventListener('resize', notifyHeight);
+// Also fire after JS updates
+const origSy = sy, origFl = fl;
+</script>
+</body>
+</html>
